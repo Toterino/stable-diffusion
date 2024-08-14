@@ -1,8 +1,10 @@
 This repository represents the code used for the following paper: [...]
 
-- The Stable Diffusion [repo](https://github.com/CompVis/stable-diffusion) was forked and used in conjunction with researcher Justin Pinkney's intuitive [repo](https://github.com/justinpinkney/stable-diffusion) on finetuning. 
+- The Stable Diffusion [repo](https://github.com/CompVis/stable-diffusion) was forked and used in conjunction with researcher Justin Pinkney's intuitive [repo](https://github.com/justinpinkney/stable-diffusion) and their [guide](https://github.com/LambdaLabsML/examples/tree/main/stable-diffusion-finetuning) on finetuning. 
 
-- The changes made (most of which were used from Pinkney's repository) are made clear through the commit history. The licence from the forked repository applies. Note that this model does not give medical advice nor does it interpret medical results.
+- The changes made (most of which were used from Pinkney's repository) are made clear through the commit history. Please explore Pinkey's amazing repository/guide; the code published here is only for reproducibility reasons.
+
+- The licence from the forked repository applies. Note that this model does not give medical advice nor does it interpret medical results.
 
 - Datasets: [BUSI](https://scholar.cu.edu.eg/?q=afahmy/pages/dataset), [CAMUS](https://www.creatis.insa-lyon.fr/Challenge/camus/)
 
