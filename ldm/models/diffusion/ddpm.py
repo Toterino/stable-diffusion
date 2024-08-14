@@ -24,7 +24,7 @@ from ldm.modules.distributions.distributions import normal_kl, DiagonalGaussianD
 from ldm.models.autoencoder import VQModelInterface, IdentityFirstStage, AutoencoderKL
 from ldm.modules.diffusionmodules.util import make_beta_schedule, extract_into_tensor, noise_like
 from ldm.models.diffusion.ddim import DDIMSampler
-
+#import matplotlib.pyplot as plt
 
 __conditioning_keys__ = {'concat': 'c_concat',
                          'crossattn': 'c_crossattn',
@@ -656,16 +656,24 @@ class LatentDiffusion(DDPM):
         x = super().get_input(batch, k)
         if bs is not None:
             x = x[:bs]
+        #image_to_check = x
         x = x.to(self.device)
         encoder_posterior = self.encode_first_stage(x)
         z = self.get_first_stage_encoding(encoder_posterior).detach()
-
         if self.model.conditioning_key is not None:
             if cond_key is None:
                 cond_key = self.cond_stage_key
             if cond_key != self.first_stage_key:
-                if cond_key in ['caption', 'coordinates_bbox']:
-                    xc = batch[cond_key]
+                if cond_key in ['caption', 'coordinates_bbox','txt']: # line taken from https://github.com/justinpinkney/stable-diffusion/blob/main/ldm/models/diffusion/ddpm.py
+                    xc = batch[cond_key] # xc are the prompts of the batch
+
+                    # Code to check the prompt-image pair
+                    #                     
+                    # print(xc[0])
+                    # plt.imshow(image_to_check.cpu().numpy()[0,0], cmap='gray')
+                    # plt.show()
+                    # exit()
+
                 elif cond_key == 'class_label':
                     xc = batch
                 else:
@@ -675,14 +683,13 @@ class LatentDiffusion(DDPM):
             if not self.cond_stage_trainable or force_c_encode:
                 if isinstance(xc, dict) or isinstance(xc, list):
                     # import pudb; pudb.set_trace()
-                    c = self.get_learned_conditioning(xc)
+                    c = self.get_learned_conditioning(xc) #c is the encoded text
                 else:
                     c = self.get_learned_conditioning(xc.to(self.device))
             else:
                 c = xc
             if bs is not None:
                 c = c[:bs]
-
             if self.use_positional_encodings:
                 pos_x, pos_y = self.compute_latent_shifts(batch)
                 ckey = __conditioning_keys__[self.model.conditioning_key]
@@ -889,7 +896,6 @@ class LatentDiffusion(DDPM):
         return [rescale_bbox(b) for b in bboxes]
 
     def apply_model(self, x_noisy, t, cond, return_ids=False):
-
         if isinstance(cond, dict):
             # hybrid case, cond is exptected to be a dict
             pass
@@ -898,7 +904,6 @@ class LatentDiffusion(DDPM):
                 cond = [cond]
             key = 'c_concat' if self.model.conditioning_key == 'concat' else 'c_crossattn'
             cond = {key: cond}
-
         if hasattr(self, "split_input_params"):
             assert len(cond) == 1  # todo can only deal with one conditioning atm
             assert not return_ids  
@@ -1371,7 +1376,6 @@ class LatentDiffusion(DDPM):
         if self.use_scheduler:
             assert 'target' in self.scheduler_config
             scheduler = instantiate_from_config(self.scheduler_config)
-
             print("Setting up LambdaLR scheduler...")
             scheduler = [
                 {

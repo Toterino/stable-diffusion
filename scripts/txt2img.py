@@ -22,6 +22,10 @@ from ldm.models.diffusion.dpm_solver import DPMSolverSampler
 from diffusers.pipelines.stable_diffusion.safety_checker import StableDiffusionSafetyChecker
 from transformers import AutoFeatureExtractor
 
+# Code to change what GPUs are available
+########################################
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+print(torch.cuda.device_count())
 
 # load safety model
 safety_model_id = "CompVis/stable-diffusion-safety-checker"
@@ -286,12 +290,15 @@ def main():
         start_code = torch.randn([opt.n_samples, opt.C, opt.H // opt.f, opt.W // opt.f], device=device)
 
     precision_scope = autocast if opt.precision=="autocast" else nullcontext
+    tims = []
+
     with torch.no_grad():
         with precision_scope("cuda"):
             with model.ema_scope():
                 tic = time.time()
                 all_samples = list()
                 for n in trange(opt.n_iter, desc="Sampling"):
+                    time_initial = time.time()
                     for prompts in tqdm(data, desc="data"):
                         uc = None
                         if opt.scale != 1.0:
@@ -328,7 +335,7 @@ def main():
 
                         if not opt.skip_grid:
                             all_samples.append(x_checked_image_torch)
-
+                    tims.append(time.time() - time_initial)
                 if not opt.skip_grid:
                     # additionally, save as grid
                     grid = torch.stack(all_samples, 0)
@@ -343,7 +350,7 @@ def main():
                     grid_count += 1
 
                 toc = time.time()
-
+    print(tims)
     print(f"Your samples are ready and waiting for you here: \n{outpath} \n"
           f" \nEnjoy.")
 

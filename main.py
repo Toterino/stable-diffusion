@@ -20,6 +20,9 @@ from pytorch_lightning.utilities import rank_zero_info
 from ldm.data.base import Txt2ImgIterableBaseDataset
 from ldm.util import instantiate_from_config
 
+# Change what GPUs are available
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+print(torch.cuda.device_count(), "GPUs are detected")
 
 def get_parser(**parser_kwargs):
     def str2bool(v):
@@ -119,6 +122,13 @@ def get_parser(**parser_kwargs):
         const=True,
         default=True,
         help="scale base-lr by ngpu * batch_size * n_accumulate",
+    )
+    parser.add_argument( # taken from https://github.com/justinpinkney/stable-diffusion/blob/main/main.py
+        "--finetune_from",
+        type=str,
+        nargs="?",
+        default="",
+        help="path to checkpoint to load model state from"
     )
     return parser
 
@@ -531,9 +541,25 @@ if __name__ == "__main__":
         trainer_opt = argparse.Namespace(**trainer_config)
         lightning_config.trainer = trainer_config
 
-        # model
         model = instantiate_from_config(config.model)
 
+        # Taken from https://github.com/justinpinkney/stable-diffusion/blob/main/main.py
+        if not opt.finetune_from == "":
+            print(f"Attempting to load state from {opt.finetune_from}")
+            old_state = torch.load(opt.finetune_from)
+            if "state_dict" in old_state:
+                print(f"Found nested key 'state_dict' in checkpoint, loading this instead")
+                old_state = old_state["state_dict"]
+
+            m, u = model.load_state_dict(old_state, strict=False)
+            if len(m) > 0:
+                print("missing keys:")
+                print(m)
+            if len(u) > 0:
+                print("unexpected keys:")
+                print(u)
+        #####################################################################
+        
         # trainer and callbacks
         trainer_kwargs = dict()
 
@@ -673,7 +699,7 @@ if __name__ == "__main__":
         # configure learning rate
         bs, base_lr = config.data.params.batch_size, config.model.base_learning_rate
         if not cpu:
-            ngpu = len(lightning_config.trainer.gpus.strip(",").split(','))
+            ngpu = 1 # hardcoded to fix the bug
         else:
             ngpu = 1
         if 'accumulate_grad_batches' in lightning_config.trainer:
