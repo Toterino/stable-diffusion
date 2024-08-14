@@ -1,3 +1,15 @@
+This repository represents the code used for the following paper: [...]
+
+- The Stable Diffusion [repo](https://github.com/CompVis/stable-diffusion) was forked and used in conjunction with researcher Justin Pinkney's intuitive [repo](https://github.com/justinpinkney/stable-diffusion) on finetuning. 
+
+- The changes made (most of which were used from Pinkney's repository) are made clear through the commit history. The licence from the forked repository applies. Note that this model does not give medical advice nor does it interpret medical results.
+
+- Datasets: [BUSI](https://scholar.cu.edu.eg/?q=afahmy/pages/dataset), [CAMUS](https://www.creatis.insa-lyon.fr/Challenge/camus/)
+
+Read the full details and guide at https://github.com/Toterino/Ultrasound_LDM
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 # Stable Diffusion
 *Stable Diffusion was made possible thanks to a collaboration with [Stability AI](https://stability.ai/) and [Runway](https://runwayml.com/) and builds upon our previous work:*
 
