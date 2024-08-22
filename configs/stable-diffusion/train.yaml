@@ -94,7 +94,7 @@ data:
       target: ldm.data.simple.TextOnly
       params:
         captions:
-        - ultrasound image
+        - "ultrasound image"
         output_size: 512
         n_gpus: 2
 
